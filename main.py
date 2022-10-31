@@ -16,6 +16,8 @@ from metricas import dice_arteria_derecha, dice_arteria_izquierda, dice_arteria_
 from dataloader import DataLoader
 from modelo import build_unet
 
+from keras.models import load_model
+
 #wandb.init(settings=wandb.Settings(start_method="fork"))
 
 def fix_gpu():
@@ -54,7 +56,7 @@ def main(config=None):
 
     artefacto_main = wandb.Artifact("entrenamiento", type="entrenamiento", description="entrenamiento de modelo")
     artefacto_main.add_file("./main.py")
-    artefacto_main.add_dir(directorio_rutas, name="dataset", description="dataset utilizado")
+    artefacto_main.add_dir(directorio_rutas, name="rutas dataset")
 
     artefacto_metrica = wandb.Artifact("metricas", type="metricas", description="calculo de metricas de entrenamiento y test")
     artefacto_metrica.add_file("./metricas.py")
@@ -116,6 +118,7 @@ def main(config=None):
             metadata=dict(config))
     
 
+    
 
     #artefacto_best_modelo_entrenado.add_file("history_"+str(config["name"])+"_"+str(config["version"])+".json")
     #wandb.run.log_artifact(artefacto_best_modelo_entrenado)
