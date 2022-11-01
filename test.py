@@ -1,4 +1,4 @@
-from metricas import dice_arteria_derecha, dice_arteria_izquierda, dice_arteria_principal, dice_coefficient, dice_promedio
+from metricas import dice_arteria_derecha, dice_arteria_izquierda, dice_arteria_principal, dice_coefficient, dice_promedio,dice_background
 from scipy.interpolate import RegularGridInterpolator
 from tensorflow.compat.v1 import InteractiveSession
 from tensorflow.compat.v1 import ConfigProto
@@ -12,6 +12,8 @@ import numpy as np
 import json
 import nrrd
 
+from metricas import dice_arteria_derecha
+
 def fix_gpu():
     config = ConfigProto()
     config.gpu_options.allow_growth = True
@@ -19,15 +21,15 @@ def fix_gpu():
 fix_gpu()
 
 
-def rediminesionar(self,volumen):
+def rediminesionar(volumen):
     x = np.linspace(0,volumen.shape[0]-1,volumen.shape[0]) 
     y = np.linspace(0,volumen.shape[1]-1,volumen.shape[1]) 
     z = np.linspace(0,volumen.shape[2]-1,volumen.shape[2]) 
 
     f = RegularGridInterpolator((x,y,z), volumen)
-    xn = np.linspace(0,volumen.shape[0]-1,self.dim[0])
-    yn = np.linspace(0,volumen.shape[1]-1,self.dim[1]) 
-    zn = np.linspace(0,volumen.shape[2]-1,self.dim[2]) 
+    xn = np.linspace(0,volumen.shape[0]-1,dim[0])
+    yn = np.linspace(0,volumen.shape[1]-1,dim[1]) 
+    zn = np.linspace(0,volumen.shape[2]-1,dim[2]) 
 
     new_grid = np.array(np.meshgrid(xn,yn,zn, indexing = 'ij'))
     new_grid = np.moveaxis(new_grid, 0, -1)  #ordena ejes 
@@ -44,29 +46,45 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
                                                     "dice_arteria_izquierda":dice_arteria_izquierda,
                                                     "dice_arteria_derecha":dice_arteria_derecha
                                                     })
-    for id in range(0,len(conjuntos)):
-
+    for id in conjuntos:
         ruta_imagen = imagenes[id] 
         ruta_etiqueta = etiquetas[id]
 
         imagen, _ = nrrd.read(ruta_imagen)
         imagen = rediminesionar(imagen)
         imagen = np.expand_dims(imagen, axis=3)
+        imagen = np.expand_dims(imagen, axis=0)
 
 
         etiqueta, _ = nrrd.read(ruta_etiqueta)
 
-        etiqueta = utils.to_categorical(etiqueta, num_classes=self.clases)
+        etiqueta = utils.to_categorical(etiqueta, num_classes=4)
         etiqueta = rediminesionar(etiqueta)
         etiqueta = (etiqueta > 0).astype(int)
         print("etiqueta shape: ",etiqueta.shape)
         print("etiqueta unique: ",np.unique(etiqueta))
+
+        print("imagen : {}".format(imagen.shape))
 
         output = model.predict(
                         imagen,
                         verbose="auto",
                         workers=1,
                     )
+
+        etiqueta = np.expand_dims(etiqueta, axis=0)
+        print("type output: ",output.dtype)
+        print("type etiqueta: ",etiqueta.dtype)
+
+        dice_derecha = dice_arteria_derecha(etiqueta.astype(np.float32),output)
+        dice_principal = dice_arteria_principal(etiqueta.astype(np.float32),output)
+        dice_izquierda = dice_arteria_izquierda(etiqueta.astype(np.float32),output)
+        dice_back = dice_background(etiqueta.astype(np.float32),output)
+        dice_prom = dice_promedio(etiqueta.astype(np.float32),output)
+
+        print(dice_derecha.numpy(),dice_principal.numpy(),dice_izquierda.numpy(),dice_back.numpy(),dice_prom.numpy())
+
+
 
         print("output: {}".format(output.shape))
 
@@ -115,10 +133,10 @@ if __name__ == "__main__":
                                         canales=1,
                                         tipo_de_dato=".nrrd")
 
-    model = build_unet(dim, n_classes=4)
+    #model = build_unet(dim, n_classes=4)
+#
+    #optimizer = optimizers.Adam(0.01) 
+    #model.compile(optimizer = optimizer, loss=dice_coefficient_loss, metrics=[dice_promedio,dice_arteria_principal,dice_arteria_izquierda,dice_arteria_derecha],run_eagerly=True)
+    #model.save("peso_test.h5")
 
-    optimizer = optimizers.Adam(0.01) 
-    model.compile(optimizer = optimizer, loss=dice_coefficient_loss, metrics=[dice_promedio,dice_arteria_principal,dice_arteria_izquierda,dice_arteria_derecha],run_eagerly=True)
-    model.save("peso_test.h5")
-
-    test_modelo("peso_test.h5",conjuntos, imagenes, etiquetas)
+    test_modelo("peso_test.h5",conjuntos["test"], imagenes, etiquetas)
