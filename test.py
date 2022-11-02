@@ -61,10 +61,6 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
         etiqueta = utils.to_categorical(etiqueta, num_classes=4)
         etiqueta = rediminesionar(etiqueta)
         etiqueta = (etiqueta > 0).astype(int)
-        print("etiqueta shape: ",etiqueta.shape)
-        print("etiqueta unique: ",np.unique(etiqueta))
-
-        print("imagen : {}".format(imagen.shape))
 
         output = model.predict(
                         imagen,
@@ -73,8 +69,6 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
                     )
 
         etiqueta = np.expand_dims(etiqueta, axis=0)
-        print("type output: ",output.dtype)
-        print("type etiqueta: ",etiqueta.dtype)
 
         dice_derecha = dice_arteria_derecha(etiqueta.astype(np.float32),output)
         dice_principal = dice_arteria_principal(etiqueta.astype(np.float32),output)
@@ -82,27 +76,9 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
         dice_back = dice_background(etiqueta.astype(np.float32),output)
         dice_prom = dice_promedio(etiqueta.astype(np.float32),output)
 
-        print(dice_derecha.numpy(),dice_principal.numpy(),dice_izquierda.numpy(),dice_back.numpy(),dice_prom.numpy())
+        print("-----Resumen Test IMG: {}:------\n - . Dice Principal: {} \n - . Dice Derecha: {}\n - . Dice Izquierdo: {}\n - . Dice Promedio: {}\n - . Dice background: {} ".format(
+                                            id,dice_principal.numpy(),dice_derecha.numpy(),dice_izquierda.numpy(),dice_prom.numpy(),dice_back.numpy()))
 
-
-
-        print("output: {}".format(output.shape))
-
-
-
-
-
-
-
-    
-
-
-
-
-    #print("x.shape: ",x.shape)
-    #results = model.evaluate(generador_test,return_dict=True)
-    #print(results)
-    #print(model.metrics_names)
 
 
 
