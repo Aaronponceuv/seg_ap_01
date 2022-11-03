@@ -13,6 +13,7 @@ import json
 import nrrd
 
 from metricas import dice_arteria_derecha
+from matplotlib import pyplot as plt
 
 def fix_gpu():
     config = ConfigProto()
@@ -44,22 +45,33 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
                                                     "dice_promedio": dice_promedio,
                                                     "dice_arteria_principal":dice_arteria_principal,
                                                     "dice_arteria_izquierda":dice_arteria_izquierda,
-                                                    "dice_arteria_derecha":dice_arteria_derecha
-                                                    })
+                                                    "dice_arteria_derecha":dice_arteria_derecha})
+    detecciones = []
+    true_etiqueta = []
+    inputs = []
     for id in conjuntos:
         ruta_imagen = imagenes[id] 
         ruta_etiqueta = etiquetas[id]
 
         imagen, _ = nrrd.read(ruta_imagen)
         imagen = rediminesionar(imagen)
+
+        dims =  imagen.shape
         imagen = np.expand_dims(imagen, axis=3)
         imagen = np.expand_dims(imagen, axis=0)
 
 
         etiqueta, _ = nrrd.read(ruta_etiqueta)
 
+        plt.imshow(etiqueta[:,:,32])
+        plt.savefig("test0.png")
+
         etiqueta = utils.to_categorical(etiqueta, num_classes=4)
         etiqueta = rediminesionar(etiqueta)
+
+        plt.imshow(etiqueta[:,:,32])
+        plt.savefig("test1.png")
+
         etiqueta = (etiqueta > 0).astype(int)
 
         output = model.predict(
@@ -78,8 +90,56 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
 
         print("-----Resumen Test IMG: {}:------\n - . Dice Principal: {} \n - . Dice Derecha: {}\n - . Dice Izquierdo: {}\n - . Dice Promedio: {}\n - . Dice background: {} ".format(
                                             id,dice_principal.numpy(),dice_derecha.numpy(),dice_izquierda.numpy(),dice_prom.numpy(),dice_back.numpy()))
+        
+        inputs.append(np.array(imagen[0]).reshape(dims))
+        detecciones.append(np.array(output[0]).reshape(128,128,64,4))
+        true_etiqueta.append(np.array(etiqueta[0]).reshape(128,128,64,4))
 
+    print("true_etiqueta: {}".format(true_etiqueta[0].shape))
+    print(np.unique(detecciones[0][:,:,32,2]))
 
+    fig, ax = plt.subplots(5,7, figsize=(10,10))
+    ax[0,0].imshow(inputs[0][:,:,32], cmap="gray")
+    ax[0,1].imshow(detecciones[0][:,:,32,2]>0.1, cmap="gray")
+    ax[0,2].imshow(detecciones[0][:,:,32,2]>0.3, cmap="gray")
+    ax[0,3].imshow(detecciones[0][:,:,32,2]>0.5, cmap="gray")
+    ax[0,4].imshow(detecciones[0][:,:,32,2]>0.7, cmap="gray")
+    ax[0,5].imshow(detecciones[0][:,:,32,2]>0.9, cmap="gray")
+    ax[0,6].imshow(true_etiqueta[0][:,:,32,1])
+
+    ax[1,0].imshow(inputs[1][:,:,32], cmap="gray")
+    ax[1,1].imshow(detecciones[1][:,:,32,2]>0.1, cmap="gray")
+    ax[1,2].imshow(detecciones[1][:,:,32,2]>0.3, cmap="gray")
+    ax[1,3].imshow(detecciones[1][:,:,32,2]>0.5, cmap="gray")
+    ax[1,4].imshow(detecciones[1][:,:,32,2]>0.7, cmap="gray")
+    ax[1,5].imshow(detecciones[1][:,:,32,2]>0.9, cmap="gray")
+    ax[1,6].imshow(true_etiqueta[1][:,:,32,1])
+
+    ax[2,0].imshow(inputs[2][:,:,32], cmap="gray")
+    ax[2,1].imshow(detecciones[2][:,:,32,2]>0.1, cmap="gray")
+    ax[2,2].imshow(detecciones[2][:,:,32,2]>0.3, cmap="gray")
+    ax[2,3].imshow(detecciones[2][:,:,32,2]>0.5, cmap="gray")
+    ax[2,4].imshow(detecciones[2][:,:,32,2]>0.7, cmap="gray")
+    ax[2,5].imshow(detecciones[2][:,:,32,2]>0.9, cmap="gray")
+    ax[2,6].imshow(true_etiqueta[2][:,:,32,1])
+
+    ax[3,0].imshow(inputs[3][:,:,32], cmap="gray")
+    ax[3,1].imshow(detecciones[3][:,:,32,2]>0.1, cmap="gray")
+    ax[3,2].imshow(detecciones[3][:,:,32,2]>0.3, cmap="gray")
+    ax[3,3].imshow(detecciones[3][:,:,32,2]>0.5, cmap="gray")
+    ax[3,4].imshow(detecciones[3][:,:,32,2]>0.7, cmap="gray")
+    ax[3,5].imshow(detecciones[3][:,:,32,2]>0.9, cmap="gray")
+    ax[3,6].imshow(true_etiqueta[3][:,:,32,1])
+
+    ax[4,0].imshow(inputs[4][:,:,32], cmap="gray")
+    ax[4,1].imshow(detecciones[4][:,:,32,2]>0.1, cmap="gray")
+    ax[4,2].imshow(detecciones[4][:,:,32,2]>0.3, cmap="gray")
+    ax[4,3].imshow(detecciones[4][:,:,32,2]>0.5, cmap="gray")
+    ax[4,4].imshow(detecciones[4][:,:,32,2]>0.7, cmap="gray")
+    ax[4,5].imshow(detecciones[4][:,:,32,2]>0.9, cmap="gray")
+    ax[4,6].imshow(true_etiqueta[4][:,:,32,1])
+
+    plt.savefig("test2.png")
 
 
 if __name__ == "__main__":
