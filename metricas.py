@@ -3,11 +3,12 @@ from keras import backend as K
 import logging
 import tensorflow as tf
 import wandb
+import numpy as np
 
 #https://stackoverflow.com/questions/72195156/correct-implementation-of-dice-loss-in-tensorflow-keras
 
 def dice_coefficient(y_true, y_pred):
-    tf.print("y_true.shape:",tf.shape(y_true))
+    #tf.print("y_true.shape:",tf.shape(y_true))
     back_true = y_true[:,:,:,:,0]
     principal_true = y_true[:,:,:,:,1]
     derecha_true = y_true[:,:,:,:,2]
@@ -42,7 +43,7 @@ def dice_coefficient(y_true, y_pred):
     wandb.log({"dice_izquierda": dice_izquierda.numpy()})
 
     dice_total = (dice_principal + dice_derecha + dice_izquierda)/3
-    tf.print("dice_total:",dice_total)
+    #tf.print("dice_total:",dice_total)
     
     wandb.log({"dice_total": dice_total.numpy()})
     return dice_total
@@ -56,20 +57,35 @@ def dice_arteria_principal(y_true, y_pred):
     flat_arteria_principal_true = K.flatten(arteria_principal_true)
     flat_arteria_principal_pred = K.flatten(arteria_principal_pred)
 
-    dice_arteria_principal = (2. * K.sum(flat_arteria_principal_true * flat_arteria_principal_pred)) / (K.sum(flat_arteria_principal_true) + K.sum(flat_arteria_principal_pred))
+    interseccion = (2. * K.sum(flat_arteria_principal_true * flat_arteria_principal_pred))
+    union = (K.sum(flat_arteria_principal_true) + K.sum(flat_arteria_principal_pred))
+
+
+    if tf.equal(union, tf.constant([0.0]))[0].numpy():
+        return tf.constant([0.0])[0]
+
+    dice_arteria_principal = interseccion / union
     
     return dice_arteria_principal
 
 
 def dice_arteria_izquierda(y_true, y_pred):
+    print("dice_arteria_izquierda",flush=True)
     arteria_izquierda_true = y_true[:,:,:,:,3]
     arteria_izquierda_pred = y_pred[:,:,:,:,3]
 
     flat_arteria_izquierda_true = K.flatten(arteria_izquierda_true)
     flat_arteria_izquierda_pred = K.flatten(arteria_izquierda_pred)
 
-    dice_arteria_izquierda = (2. * K.sum(flat_arteria_izquierda_true * flat_arteria_izquierda_pred)) / (K.sum(flat_arteria_izquierda_true) + K.sum(flat_arteria_izquierda_pred))
-    
+    interseccion = (2. * K.sum(flat_arteria_izquierda_true * flat_arteria_izquierda_pred))
+    union = (K.sum(flat_arteria_izquierda_true) + K.sum(flat_arteria_izquierda_pred))
+
+
+    if tf.equal(union, tf.constant([0.0]))[0].numpy():
+        return tf.constant([0.0])[0]
+
+    dice_arteria_izquierda = interseccion / union
+
     return dice_arteria_izquierda
 
 
@@ -80,8 +96,15 @@ def dice_arteria_derecha(y_true, y_pred):
     flat_arteria_derecha_true = K.flatten(arteria_derecha_true)
     flat_arteria_derecha_pred = K.flatten(arteria_derecha_pred)
 
-    interseccion = K.sum(flat_arteria_derecha_true * flat_arteria_derecha_pred)
-    dice_arteria_derecha = (2. * interseccion) / (K.sum(flat_arteria_derecha_true) + K.sum(flat_arteria_derecha_pred))
+    interseccion = (2. * K.sum(flat_arteria_derecha_true * flat_arteria_derecha_pred))
+    union = (K.sum(flat_arteria_derecha_true) + K.sum(flat_arteria_derecha_pred))
+
+
+    if tf.equal(union, tf.constant([0.0]))[0].numpy():
+        return tf.constant([0.0])[0]
+
+    dice_arteria_derecha = interseccion / union
+
     
     return dice_arteria_derecha
 
@@ -93,7 +116,14 @@ def dice_background(y_true, y_pred):
     flat_background_true = K.flatten(background_true)
     flat_background_pred = K.flatten(background_pred)
 
-    dice_background = (2. * K.sum(flat_background_true * flat_background_pred)) / (K.sum(flat_background_true) + K.sum(flat_background_pred))
+    interseccion = (2. * K.sum(flat_background_true * flat_background_pred))
+    union = (K.sum(flat_background_true) + K.sum(flat_background_pred))
+
+
+    if tf.equal(union, tf.constant([0.0]))[0].numpy():
+        return tf.constant([0.0])[0]
+
+    dice_background = interseccion / union
     
     return dice_background
 
