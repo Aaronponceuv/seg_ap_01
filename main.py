@@ -17,7 +17,7 @@ from dataloader import DataLoader
 from modelo import build_unet
 
 from keras.models import load_model
-
+from test import test_modelo
 #wandb.init(settings=wandb.Settings(start_method="fork"))
 
 def fix_gpu():
@@ -120,10 +120,12 @@ def main(config=None):
 
     
 
-    #artefacto_best_modelo_entrenado.add_file("history_"+str(config["name"])+"_"+str(config["version"])+".json")
-    #wandb.run.log_artifact(artefacto_best_modelo_entrenado)
-    #artefacto_best_modelo_entrenado.add_file(wandb.run.dir+"/model-best.h5")
-    #wandb.run.log_artifact(artefacto_best_modelo_entrenado)
+    artefacto_best_modelo_entrenado.add_file("history_"+str(config["name"])+"_"+str(config["version"])+".json")
+    wandb.run.log_artifact(artefacto_best_modelo_entrenado)
+    artefacto_best_modelo_entrenado.add_file(wandb.run.dir+"/model-best.h5")
+    wandb.run.log_artifact(artefacto_best_modelo_entrenado)
+
+    test_modelo(wandb.run.dir+"/model-best.h5",conjuntos["test"], imagenes, etiquetas)
 
 
 if __name__ == "__main__":
@@ -132,7 +134,7 @@ if __name__ == "__main__":
     config = {
         "modelo":"unet3d",
         "learning_rate": 0.1,
-        "epochs": 2,
+        "epochs": 4,
         "batch_size": 1,
         "clases":4,
         "version": 0,

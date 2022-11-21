@@ -62,7 +62,7 @@ def dice_arteria_principal(y_true, y_pred):
 
 
     if tf.equal(union, tf.constant([0.0]))[0].numpy():
-        return 0
+        return tf.constant([0.0])[0]
 
     dice_arteria_principal = interseccion / union
     
@@ -82,7 +82,7 @@ def dice_arteria_izquierda(y_true, y_pred):
 
 
     if tf.equal(union, tf.constant([0.0]))[0].numpy():
-        return 0
+        return tf.constant([0.0])[0]
 
     dice_arteria_izquierda = interseccion / union
 
@@ -101,7 +101,7 @@ def dice_arteria_derecha(y_true, y_pred):
 
 
     if tf.equal(union, tf.constant([0.0]))[0].numpy():
-        return 0
+        return tf.constant([0.0])[0]
 
     dice_arteria_derecha = interseccion / union
 
@@ -121,7 +121,7 @@ def dice_background(y_true, y_pred):
 
 
     if tf.equal(union, tf.constant([0.0]))[0].numpy():
-        return 0
+        return tf.constant([0.0])[0]
 
     dice_background = interseccion / union
     
