@@ -5,8 +5,6 @@ from tensorflow.compat.v1 import ConfigProto
 from perdidas import dice_coefficient_loss
 from keras.models import load_model
 from dataloader import DataLoader
-from modelo import build_unet
-from  keras import optimizers
 from keras import utils
 import numpy as np
 import json
@@ -18,6 +16,7 @@ from matplotlib.colors import Colormap, ListedColormap
 
 import wandb
 from monai.transforms import Resized
+import time
 
 
 def fix_gpu():
@@ -68,19 +67,126 @@ def recorrer(segmentacion,map=None):
     plt.show()
 
 
-def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
+def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_labels):
+    for img,y_true,y_pred,nombre_imagen in zip(inputs,true_etiqueta,detecciones,nombre_imagenes):
+        print("img {},y_true {},y_pred :{}".format(img.shape,y_true.shape,y_pred.shape))
 
-    model = load_model(ruta_modelo,custom_objects={"dice_coefficient_loss":dice_coefficient_loss,
-                                                    "dice_promedio": dice_promedio,
-                                                    "dice_arteria_principal":dice_arteria_principal,
-                                                    "dice_arteria_izquierda":dice_arteria_izquierda,
-                                                    "dice_arteria_derecha":dice_arteria_derecha})
+        print(img.shape)
+
+        # Sagital
+        for id in range(0,img.shape[2]):
+            print("id ",id)
+            print(img[:,:,id].shape)
+            imagen = img[:,:,id] * 255
+
+            plt.imshow(imagen, cmap="gray")
+            plt.axis('off')
+            plt.imsave("image.png",imagen,cmap="gray")
+            time.sleep(0.2)
+
+            print(y_true[:,:,id,1].shape)
+            print(y_pred[:,:,id,1].shape)
+
+
+            ground_truth = y_true[:,:,id,1] +y_true[:,:,id,2]*2 + y_true[:,:,id,3]*3 #+ y_true[:,:,id,4]
+            predictions = y_pred[:,:,id,1] + y_pred[:,:,id,2]*2 + y_pred[:,:,id,3]*3 #+ y_pred[:,:,id,4]
+
+
+            print("np unique ground_truth: ",np.unique(ground_truth))
+            print("np unique predictions: ",np.unique(predictions))
+
+            mask_img = wandb.Image("image.png", masks={
+                "predictions": {
+                    "mask_data": predictions,
+                    "class_labels": class_labels
+                },
+                "ground_truth" : {
+                        "mask_data" : ground_truth,
+                        "class_labels" : class_labels
+                    }
+                })
+            
+            wandb.log({nombre_imagen+"_sagital":mask_img})
+
+
+        # Coronal
+        #"""
+        for id in range(0,img.shape[1]):
+            print("id ",id)
+            print(img[:,id,:].shape)
+            imagen = img[:,id,:] * 255
+
+            plt.imshow(imagen, cmap="gray")
+            plt.axis('off')
+            plt.imsave("image.png",imagen,cmap="gray")
+            time.sleep(0.2)
+
+            print(y_true[:,id,:,1].shape)
+            print(y_pred[:,id,:,1].shape)
+
+
+            ground_truth = y_true[:,id,:,1] +y_true[:,id,:,2]*2 + y_true[:,id,:,3]*3 #+ y_true[:,id,:,4]
+            predictions = y_pred[:,id,:,1] + y_pred[:,id,:,2]*2 + y_pred[:,id,:,3]*3 #+ y_pred[:,id,:,4]
+
+
+            print("np unique ground_truth: ",np.unique(ground_truth))
+            print("np unique predictions: ",np.unique(predictions))
+
+            mask_img = wandb.Image("image.png", masks={
+                "predictions": {
+                    "mask_data": predictions,
+                    "class_labels": class_labels
+                },
+                "ground_truth" : {
+                        "mask_data" : ground_truth,
+                        "class_labels" : class_labels
+                    }
+                })
+            
+            wandb.log({nombre_imagen+"_coronal":mask_img})
+
+
+        for id in range(0,img.shape[0]):
+            print("id ",id)
+            print(img[id,:,:].shape)
+            imagen = img[id,:,:] * 255
+
+            plt.imshow(imagen, cmap="gray")
+            plt.axis('off')
+            plt.imsave("image.png",imagen,cmap="gray")
+            time.sleep(0.2)
+
+            print(y_true[id,:,:,1].shape)
+            print(y_pred[id,:,:,1].shape)
+
+
+            ground_truth = y_true[id,:,:,1] +y_true[id,:,:,2]*2 + y_true[id,:,:,3]*3 #+ y_true[id,:,:,4]
+            predictions = y_pred[id,:,:,1] + y_pred[id,:,:,2]*2 + y_pred[id,:,:,3]*3 #+ y_pred[id,:,:,4]
+
+
+            print("np unique ground_truth: ",np.unique(ground_truth))
+            print("np unique predictions: ",np.unique(predictions))
+
+            mask_img = wandb.Image("image.png", masks={
+                "predictions": {
+                    "mask_data": predictions,
+                    "class_labels": class_labels
+                },
+                "ground_truth" : {
+                        "mask_data" : ground_truth,
+                        "class_labels" : class_labels
+                    }
+                })
+            
+            wandb.log({nombre_imagen+"_axial":mask_img})
+
+
+def evaluar_imagenes(model,conjuntos,imagenes,etiquetas):
     detecciones = []
     true_etiqueta = []
     inputs = []
     true_etiquetas_no_binarias = []
-    #redim_m = Resized(keys=["image", "seg","seg_art_principal","seg_art_derecha","seg_art_izquierda"], spatial_size=(128,128,64), mode=('nearest'))
-    #data_dict = redim_m(data_dict)
+
     for id in conjuntos:
         ruta_imagen = imagenes[id] 
         ruta_etiqueta = etiquetas[id]
@@ -89,121 +195,64 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
         imagen = rediminesionar(imagen)
 
         dims =  imagen.shape
-        imagen = np.expand_dims(imagen, axis=3)
-        imagen = np.expand_dims(imagen, axis=0)
+        
 
 
         etiqueta_no_binaria, _ = nrrd.read(ruta_etiqueta)
         true_etiquetas_no_binarias.append(etiqueta_no_binaria)
 
-        arteria_principal = etiqueta_no_binaria == 1
-        arteria_derecha = etiqueta_no_binaria == 2
-        arteria_izquierda = etiqueta_no_binaria == 3
-
-
-        arteria_principal = np.expand_dims(arteria_principal, axis=0)
-        arteria_derecha = np.expand_dims(arteria_derecha, axis=0)
-        arteria_izquierda = np.expand_dims(arteria_izquierda, axis=0)
-
-        #Resized(arteria_izquierda,mode="nearest")
-
-
-        plt.imshow(etiqueta_no_binaria[:,:,32])
-        plt.savefig("test0.png")
 
         etiqueta = utils.to_categorical(etiqueta_no_binaria, num_classes=4)
         etiqueta = rediminesionar(etiqueta)
+        etiqueta = (etiqueta > 0.5).astype(int)
+        #plt.imshow(etiqueta[:,:,20])
+        #plt.savefig("test1.png")
+        #plt.close()
 
-        print("etiqueta redim : ",etiqueta.shape)
+        print("etiqueta shape: {}".format(etiqueta.shape))
+        print("imagen shape: {}".format(imagen.shape))
 
-        plt.imshow(etiqueta[:,:,32])
-        plt.savefig("test1.png")
 
-        
 
-        etiqueta = (etiqueta > 0).astype(int)
+        imagen = np.expand_dims(imagen, axis=3)
+        imagen = np.expand_dims(imagen, axis=0)
+
+        etiqueta = np.expand_dims(etiqueta, axis=0)
 
         output = model.predict(
                         imagen,
                         verbose="auto",
                         workers=1,
                     )
+        #debug
+        #output = np.random.randint(2, size=(1, 128, 128, 64, 4)).astype(np.float32)
+        #print("Etiqueta unique: {} shape:{} ".format(np.unique(etiqueta.astype(np.float32)), etiqueta.shape))
 
-        etiqueta = np.expand_dims(etiqueta, axis=0)
+        output = (output > 0.5).astype(np.float32)
 
-        dice_derecha = dice_arteria_derecha(etiqueta.astype(np.float32),output)
-        dice_principal = dice_arteria_principal(etiqueta.astype(np.float32),output)
-        dice_izquierda = dice_arteria_izquierda(etiqueta.astype(np.float32),output)
-        dice_back = dice_background(etiqueta.astype(np.float32),output)
-        dice_prom = dice_promedio(etiqueta.astype(np.float32),output)
+        etiqueta = etiqueta.astype(np.float32)
+
+        dice_derecha = dice_arteria_derecha(etiqueta,output)
+        dice_principal = dice_arteria_principal(etiqueta,output)
+        dice_izquierda = dice_arteria_izquierda(etiqueta,output)
+        dice_back = dice_background(etiqueta,output)
+        dice_prom = dice_promedio(etiqueta,output)
 
         print("-----Resumen Test IMG: {}:------\n - . Dice Principal: {} \n - . Dice Derecha: {}\n - . Dice Izquierdo: {}\n - . Dice Promedio: {}\n - . Dice background: {} ".format(
                                             id,dice_principal.numpy(),dice_derecha.numpy(),dice_izquierda.numpy(),dice_prom.numpy(),dice_back.numpy()))
-        
+
         inputs.append(np.array(imagen[0]).reshape(dims))
         detecciones.append(np.array(output[0]).reshape(128,128,64,4))
         true_etiqueta.append(np.array(etiqueta[0]).reshape(128,128,64,4))
 
-    print("true_etiqueta: {}".format(true_etiqueta[0].shape))
-    print(np.max(detecciones[0][:,:,32,2]))
+    return inputs, detecciones, true_etiqueta
 
 
 
-    fig, ax = plt.subplots(5,7, figsize=(10,10))
-    ax[0,0].imshow(inputs[0][:,:,32], cmap="gray")
-    ax[0,1].imshow(detecciones[0][:,:,32,2]>0.1, cmap="gray")
-    ax[0,2].imshow(detecciones[0][:,:,32,2]>0.3, cmap="gray")
-    ax[0,3].imshow(detecciones[0][:,:,32,2]>0.5, cmap="gray")
-    ax[0,4].imshow(detecciones[0][:,:,32,2]>0.7, cmap="gray")
-    ax[0,5].imshow(detecciones[0][:,:,32,2]>0.9, cmap="gray")
-    ax[0,6].imshow(true_etiqueta[0][:,:,32,1])
 
-    ax[1,0].imshow(inputs[1][:,:,32], cmap="gray")
-    ax[1,1].imshow(detecciones[1][:,:,32,2]>0.1, cmap="gray")
-    ax[1,2].imshow(detecciones[1][:,:,32,2]>0.3, cmap="gray")
-    ax[1,3].imshow(detecciones[1][:,:,32,2]>0.5, cmap="gray")
-    ax[1,4].imshow(detecciones[1][:,:,32,2]>0.7, cmap="gray")
-    ax[1,5].imshow(detecciones[1][:,:,32,2]>0.9, cmap="gray")
-    ax[1,6].imshow(true_etiqueta[1][:,:,32,1])
 
-    ax[2,0].imshow(inputs[2][:,:,32], cmap="gray")
-    ax[2,1].imshow(detecciones[2][:,:,32,2]>0.1, cmap="gray")
-    ax[2,2].imshow(detecciones[2][:,:,32,2]>0.3, cmap="gray")
-    ax[2,3].imshow(detecciones[2][:,:,32,2]>0.5, cmap="gray")
-    ax[2,4].imshow(detecciones[2][:,:,32,2]>0.7, cmap="gray")
-    ax[2,5].imshow(detecciones[2][:,:,32,2]>0.9, cmap="gray")
-    ax[2,6].imshow(true_etiqueta[2][:,:,32,1])
 
-    ax[3,0].imshow(inputs[3][:,:,32], cmap="gray")
-    ax[3,1].imshow(detecciones[3][:,:,32,2]>0.1, cmap="gray")
-    ax[3,2].imshow(detecciones[3][:,:,32,2]>0.3, cmap="gray")
-    ax[3,3].imshow(detecciones[3][:,:,32,2]>0.5, cmap="gray")
-    ax[3,4].imshow(detecciones[3][:,:,32,2]>0.7, cmap="gray")
-    ax[3,5].imshow(detecciones[3][:,:,32,2]>0.9, cmap="gray")
-    ax[3,6].imshow(true_etiqueta[3][:,:,32,1])
-                                                                                                                                                                                 
-    ax[4,0].imshow(inputs[4][:,:,32], cmap="gray")
-    ax[4,1].imshow((detecciones[4][:,:,32,2]>0.1).astype(np.int8), cmap="gray")
-    ax[4,2].imshow((detecciones[4][:,:,32,2]>0.3).astype(np.int8), cmap="gray")
-    ax[4,3].imshow((detecciones[4][:,:,32,2]>0.5).astype(np.int8), cmap="gray")
-    ax[4,4].imshow((detecciones[4][:,:,32,2]>0.7).astype(np.int8), cmap="gray")
-    ax[4,5].imshow((detecciones[4][:,:,32,2]>0.9).astype(np.int8), cmap="gray")
-    ax[4,6].imshow(true_etiqueta[4][:,:,32,1])
-
-    plt.savefig("test2.png")
-
-    print("nop unique: ",np.unique((detecciones[4][:,:,32,2]>0.5).astype(np.int8)))
-    print("detecciones[0][:,:,:,:]: ",detecciones[0][:,:,:,:].shape)
-
-    print("np unique etiqueta ", np.unique(true_etiquetas_no_binarias[0][:,32,:]))
-
-    plt.clf()
-    plt.close()
-
-    plt.imshow(true_etiquetas_no_binarias[0][:,32,:])
-    plt.savefig("test_true.png")
-
-    mask_data = np.array([[1, 2, 2, ... , 2, 2, 1], ...])
+def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
 
     class_labels = {
         0: "Background",
@@ -212,74 +261,22 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
         3: "Art. pulmonar izquierda"
     }
 
+    nombre_imagenes = list(conjuntos)
+
+    model = load_model(ruta_modelo,custom_objects={"dice_coefficient_loss":dice_coefficient_loss,
+                                                    "dice_promedio": dice_promedio,
+                                                    "dice_arteria_principal":dice_arteria_principal,
+                                                    "dice_arteria_izquierda":dice_arteria_izquierda,
+                                                    "dice_arteria_derecha":dice_arteria_derecha})
+    
+
+    
+    inputs, detecciones, true_etiqueta = evaluar_imagenes(model,conjuntos,imagenes,etiquetas)
+    registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_labels)
 
 
-    img = (inputs[0][:,:,32]).astype(np.float16)
 
-
-    mask_img = wandb.Image(img, masks={
-                "predictions": {
-                    "mask_data": detecciones[0][:,:,32,2],
-                    "class_labels": class_labels
-                },
-                "ground_truth" : {
-                        "mask_data" : true_etiquetas_no_binarias[0][:,32,:],
-                        "class_labels" : class_labels
-                    }
-
-            })
-
-    wandb.log({"test":mask_img})
-
-
-    img = (inputs[0][:,:,32]).astype(np.int8) * 255
-    mask_img = wandb.Image(img, masks={
-                "predictions": {
-                    "mask_data": detecciones[0][:,32,2],
-                    "class_labels": class_labels
-                },
-                "ground_truth" : {
-                        "mask_data" : true_etiquetas_no_binarias[0][:,32,:],
-                        "class_labels" : class_labels
-                    }
-
-            })
-
-    wandb.log({"test":mask_img})
-
-    img = (inputs[0][:,:,32]).astype(np.int8) * 255
-    mask_img = wandb.Image(img, masks={
-                "predictions": {
-                    "mask_data": detecciones[0][:,32,2],
-                    "class_labels": class_labels
-                },
-                "ground_truth" : {
-                        "mask_data" : (true_etiquetas_no_binarias[0][:,32,:]),
-                        "class_labels" : class_labels
-                    }
-
-            })
-
-    wandb.log({"test":mask_img})
-
-    img = (inputs[0][:,:,32]).astype(np.int8) * 255
-    mask_img = wandb.Image(img, masks={
-                "predictions": {
-                    "mask_data": detecciones[0][:,:,32,2],
-                    "class_labels": class_labels
-                },
-                "ground_truth" : {
-                        "mask_data" : true_etiquetas_no_binarias[0][:,32,:],
-                        "class_labels" : class_labels
-                    }
-
-            })
-
-    wandb.log({"test":mask_img})
-
-
-    #recorrer(detecciones[4][:,:,32,2]>0.3)
-
+   
 
 if __name__ == "__main__":
 
@@ -302,18 +299,6 @@ if __name__ == "__main__":
     imagenes = json.load(imagenes)
     
     print(conjuntos["test"])
-    generador_test = DataLoader(conjuntos["test"], imagenes, etiquetas, 
-                                        batch_size=1,
-                                        dim=dim[0:3],
-                                        shuffle=False,
-                                        n_clases=4,
-                                        canales=1,
-                                        tipo_de_dato=".nrrd")
 
-    #model = build_unet(dim, n_classes=4)
-#
-    #optimizer = optimizers.Adam(0.01) 
-    #model.compile(optimizer = optimizer, loss=dice_coefficient_loss, metrics=[dice_promedio,dice_arteria_principal,dice_arteria_izquierda,dice_arteria_derecha],run_eagerly=True)
-    #model.save("peso_test.h5")
 
     test_modelo("peso_test.h5",conjuntos["test"], imagenes, etiquetas)
