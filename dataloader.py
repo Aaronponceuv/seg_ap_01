@@ -17,7 +17,6 @@ class DataLoader(keras.utils.Sequence):
             assert len(lista_ID) >= batch_size, "error!: batch size es mayor a la cantidad de datos disponibles"
         except AssertionError as e:
             msj = "dataloader line 19 {}".format(e)
-            print(msj)
             logging.error(msj)
 
         self.imagenes = imagenes
@@ -49,7 +48,7 @@ class DataLoader(keras.utils.Sequence):
 
 
     def __getitem__(self,index): # index = numero de batch hasta __len__
-        print("index: {}".format(index))
+        #print("index: {}".format(index))
 
         #indices seleccionados
         indices = self.indices[index*self.batch_size:(index+1)*self.batch_size]
@@ -103,7 +102,6 @@ class DataLoader(keras.utils.Sequence):
             etiqueta = keras.utils.to_categorical(etiqueta, num_classes=self.clases)
             etiqueta = self.rediminesionar(etiqueta)
             etiqueta = (etiqueta > 0).astype(int)
-            #print("etiqueta shape: ",etiqueta.shape)
 
             X[i,] = magnitud
             y[i,] = etiqueta
