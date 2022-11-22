@@ -56,7 +56,7 @@ class DataLoader(keras.utils.Sequence):
 
         #Busqueda de lista de ids
         list_IDs_temp = [self.list_IDs[k] for k in indices]
-
+        print(indices)
         X, y = self.__data_generation(list_IDs_temp)
         
         return X,y
