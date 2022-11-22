@@ -134,7 +134,7 @@ if __name__ == "__main__":
     config = {
         "modelo":"unet3d",
         "learning_rate": 0.1,
-        "epochs": 4,
+        "epochs": 15,
         "batch_size": 1,
         "clases":4,
         "version": 0,
