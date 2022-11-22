@@ -101,7 +101,7 @@ def main(config=None):
     #ruta_save = directorio_pesos+'/version_'+str(config["version"])+"_epoca_{epoch:02d}_val_loss_{val_loss:.2f}_loss_{loss:.2f}_val_dice_{val_dice_coefficient:.2f}_train_dice_{dice_coefficient:.2f}.h5"
     #checkpoint = ModelCheckpoint(ruta_save, monitor="loss", verbose=1,save_best_only=True, mode="min", save_weights_only=False)
     history = model.fit(generador_entrenamiento,validation_data=generador_test,epochs=config["epochs"], 
-                        workers=3, use_multiprocessing=False, verbose=1,callbacks=[WandbCallback(monitor="val_dice_coefficient",verbose=1)])#checkpoint ,
+                        workers=3, use_multiprocessing=False, verbose=1,callbacks=[WandbCallback(monitor="val_dice_promedio",mode="max",verbose=1)])#checkpoint ,
     
     file = open("history_"+str("nombre")+"_"+str("version")+".json", "w")
     json.dump(history.history, file)
