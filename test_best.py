@@ -1,7 +1,7 @@
 from metricas import dice_arteria_derecha, dice_arteria_izquierda, dice_arteria_principal, dice_coefficient, dice_promedio,dice_background
 from scipy.interpolate import RegularGridInterpolator
-from tensorflow.compat.v1 import InteractiveSession
-from tensorflow.compat.v1 import ConfigProto
+#from tensorflow.compat.v1 import InteractiveSession
+#from tensorflow.compat.v1 import ConfigProto
 from perdidas import dice_coefficient_loss
 from keras.models import load_model
 from dataloader import DataLoader
@@ -19,11 +19,11 @@ from monai.transforms import Resized
 import time
 
 
-def fix_gpu():
-    config = ConfigProto()
-    config.gpu_options.allow_growth = True
-    session = InteractiveSession(config=config)
-fix_gpu()
+#def fix_gpu():
+#    config = ConfigProto()
+#    config.gpu_options.allow_growth = True
+#    session = InteractiveSession(config=config)
+#fix_gpu()
 
 
 def rediminesionar(volumen):
