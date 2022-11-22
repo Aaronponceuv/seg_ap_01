@@ -97,13 +97,13 @@ class DataLoader(keras.utils.Sequence):
                     #etiqueta = self.rediminesionar(etiqueta)
                     #etiqueta = np.expand_dims(etiqueta, axis=3)
             except Exception as e:
-                print("{} {} {} {}".format(ID,ruta_etiqueta,e,e.args))
-                logging.critical("{} {} {} {}".format(ID,ruta_etiqueta,e,e.args))
+                print("ERROR L101 Dataloader: {} {} {} {}".format(ID,ruta_etiqueta,e,e.args))
+                logging.critical("ERROR L101 Dataloader: {} {} {} {}".format(ID,ruta_etiqueta,e,e.args))
             
             etiqueta = keras.utils.to_categorical(etiqueta, num_classes=self.clases)
             etiqueta = self.rediminesionar(etiqueta)
             etiqueta = (etiqueta > 0).astype(int)
-            print("etiqueta shape: ",etiqueta.shape)
+            #print("etiqueta shape: ",etiqueta.shape)
 
             X[i,] = magnitud
             y[i,] = etiqueta

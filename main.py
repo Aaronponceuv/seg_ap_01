@@ -17,7 +17,7 @@ from dataloader import DataLoader
 from modelo import build_unet
 
 from keras.models import load_model
-from test import test_modelo
+from test_best import test_modelo
 #wandb.init(settings=wandb.Settings(start_method="fork"))
 
 def fix_gpu():
