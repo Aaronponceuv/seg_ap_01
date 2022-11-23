@@ -103,7 +103,7 @@ def main(config=None):
     history = model.fit(generador_entrenamiento,validation_data=generador_test,epochs=config["epochs"], 
                         workers=3, use_multiprocessing=False, verbose=1,callbacks=[WandbCallback(monitor="val_dice_promedio",mode="max",verbose=1)])#checkpoint ,
     
-    file = open("history_"+str("nombre")+"_"+str("version")+".json", "w")
+    file = open("history_seg_ap_01_.json", "w")
     json.dump(history.history, file)
     file.close()
 
@@ -120,7 +120,7 @@ def main(config=None):
 
     
 
-    artefacto_best_modelo_entrenado.add_file("history_"+str(config["name"])+"_"+str(config["version"])+".json")
+    artefacto_best_modelo_entrenado.add_file("history_seg_ap_01_.json")
     wandb.run.log_artifact(artefacto_best_modelo_entrenado)
     artefacto_best_modelo_entrenado.add_file(wandb.run.dir+"/model-best.h5")
     wandb.run.log_artifact(artefacto_best_modelo_entrenado)
