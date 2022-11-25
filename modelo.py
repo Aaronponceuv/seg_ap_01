@@ -27,8 +27,8 @@ def encoder_block(input, num_filters):
 #skip features gets input from encoder for concatenation
 def decoder_block(input, skip_features, num_filters):
     x = Conv3DTranspose(num_filters, (2, 2, 2), strides=2, padding="same")(input)
-    print(x.shape)
-    print(skip_features.shape)
+    #print(x.shape)
+    #print(skip_features.shape)
     x = Concatenate()([x, skip_features])
     x = conv_block(x, num_filters)
     return x
@@ -55,7 +55,7 @@ def build_unet(input_shape, n_classes):
       activation = 'softmax'
 
     outputs = Conv3D(n_classes, 1, padding="same", activation=activation,dtype=tf.float32)(d4)  
-    print(activation)
+    #print(activation)
 
     model = Model(inputs, outputs, name="U-Net")
     return model

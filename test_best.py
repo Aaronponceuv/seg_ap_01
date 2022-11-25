@@ -69,14 +69,13 @@ def recorrer(segmentacion,map=None):
 
 def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_labels):
     for img,y_true,y_pred,nombre_imagen in zip(inputs,true_etiqueta,detecciones,nombre_imagenes):
-        print("img {},y_true {},y_pred :{}".format(img.shape,y_true.shape,y_pred.shape))
-
-        print(img.shape)
+        print("=> Registrando {}".format(nombre_imagen))
+        #print("img {},y_true {},y_pred :{}".format(img.shape,y_true.shape,y_pred.shape))
 
         # Sagital
         for id in range(0,img.shape[2]):
-            print("id ",id)
-            print(img[:,:,id].shape)
+            #print("id ",id)
+            #print(img[:,:,id].shape)
             imagen = img[:,:,id] * 255
 
             plt.imshow(imagen, cmap="gray")
@@ -84,16 +83,16 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
             plt.imsave("image.png",imagen,cmap="gray")
             time.sleep(0.2)
 
-            print(y_true[:,:,id,1].shape)
-            print(y_pred[:,:,id,1].shape)
+            #print(y_true[:,:,id,1].shape)
+            #print(y_pred[:,:,id,1].shape)
 
 
             ground_truth = y_true[:,:,id,1] +y_true[:,:,id,2]*2 + y_true[:,:,id,3]*3 #+ y_true[:,:,id,4]
             predictions = y_pred[:,:,id,1] + y_pred[:,:,id,2]*2 + y_pred[:,:,id,3]*3 #+ y_pred[:,:,id,4]
 
 
-            print("np unique ground_truth: ",np.unique(ground_truth))
-            print("np unique predictions: ",np.unique(predictions))
+            #print("np unique ground_truth: ",np.unique(ground_truth))
+            #print("np unique predictions: ",np.unique(predictions))
 
             mask_img = wandb.Image("image.png", masks={
                 "predictions": {
@@ -112,8 +111,7 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
         # Coronal
         #"""
         for id in range(0,img.shape[1]):
-            print("id ",id)
-            print(img[:,id,:].shape)
+            ##print("id ",id)
             imagen = img[:,id,:] * 255
 
             plt.imshow(imagen, cmap="gray")
@@ -121,16 +119,16 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
             plt.imsave("image.png",imagen,cmap="gray")
             time.sleep(0.2)
 
-            print(y_true[:,id,:,1].shape)
-            print(y_pred[:,id,:,1].shape)
+            #print(y_true[:,id,:,1].shape)
+            #print(y_pred[:,id,:,1].shape)
 
 
             ground_truth = y_true[:,id,:,1] +y_true[:,id,:,2]*2 + y_true[:,id,:,3]*3 #+ y_true[:,id,:,4]
             predictions = y_pred[:,id,:,1] + y_pred[:,id,:,2]*2 + y_pred[:,id,:,3]*3 #+ y_pred[:,id,:,4]
 
 
-            print("np unique ground_truth: ",np.unique(ground_truth))
-            print("np unique predictions: ",np.unique(predictions))
+            print("clases ground_truth: ",np.unique(ground_truth))
+            print("clases predictions: ",np.unique(predictions))
 
             mask_img = wandb.Image("image.png", masks={
                 "predictions": {
@@ -147,8 +145,7 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
 
 
         for id in range(0,img.shape[0]):
-            print("id ",id)
-            print(img[id,:,:].shape)
+            #print("=] id ",id)
             imagen = img[id,:,:] * 255
 
             plt.imshow(imagen, cmap="gray")
@@ -156,16 +153,16 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
             plt.imsave("image.png",imagen,cmap="gray")
             time.sleep(0.2)
 
-            print(y_true[id,:,:,1].shape)
-            print(y_pred[id,:,:,1].shape)
+            #print(y_true[id,:,:,1].shape)
+            #print(y_pred[id,:,:,1].shape)
 
 
             ground_truth = y_true[id,:,:,1] +y_true[id,:,:,2]*2 + y_true[id,:,:,3]*3 #+ y_true[id,:,:,4]
             predictions = y_pred[id,:,:,1] + y_pred[id,:,:,2]*2 + y_pred[id,:,:,3]*3 #+ y_pred[id,:,:,4]
 
 
-            print("np unique ground_truth: ",np.unique(ground_truth))
-            print("np unique predictions: ",np.unique(predictions))
+            print("clases ground_truth: ",np.unique(ground_truth))
+            print("clases predictions: ",np.unique(predictions))
 
             mask_img = wandb.Image("image.png", masks={
                 "predictions": {
@@ -209,8 +206,8 @@ def evaluar_imagenes(model,conjuntos,imagenes,etiquetas,dimension_target):
         #plt.savefig("test1.png")
         #plt.close()
 
-        print("etiqueta shape: {}".format(etiqueta.shape))
-        print("imagen shape: {}".format(imagen.shape))
+        #print("etiqueta shape: {}".format(etiqueta.shape))
+        #print("imagen shape: {}".format(imagen.shape))
 
 
 
