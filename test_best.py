@@ -27,6 +27,7 @@ import time
 
 
 def rediminesionar(volumen):
+    dim=(128, 128, 64,1)
     x = np.linspace(0,volumen.shape[0]-1,volumen.shape[0]) 
     y = np.linspace(0,volumen.shape[1]-1,volumen.shape[1]) 
     z = np.linspace(0,volumen.shape[2]-1,volumen.shape[2]) 
