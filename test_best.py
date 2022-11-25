@@ -127,9 +127,7 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
             predictions = y_pred[:,id,:,1] + y_pred[:,id,:,2]*2 + y_pred[:,id,:,3]*3 #+ y_pred[:,id,:,4]
 
 
-            print("clases ground_truth: ",np.unique(ground_truth))
-            print("clases predictions: ",np.unique(predictions))
-
+            
             mask_img = wandb.Image("image.png", masks={
                 "predictions": {
                     "mask_data": predictions,
@@ -161,9 +159,7 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
             predictions = y_pred[id,:,:,1] + y_pred[id,:,:,2]*2 + y_pred[id,:,:,3]*3 #+ y_pred[id,:,:,4]
 
 
-            print("clases ground_truth: ",np.unique(ground_truth))
-            print("clases predictions: ",np.unique(predictions))
-
+            
             mask_img = wandb.Image("image.png", masks={
                 "predictions": {
                     "mask_data": predictions,
