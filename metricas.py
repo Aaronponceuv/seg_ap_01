@@ -70,7 +70,7 @@ def dice_arteria_principal(y_true, y_pred):
 
 
 def dice_arteria_izquierda(y_true, y_pred):
-    print("dice_arteria_izquierda",flush=True)
+    #print("dice_arteria_izquierda",flush=True)
     arteria_izquierda_true = y_true[:,:,:,:,3]
     arteria_izquierda_pred = y_pred[:,:,:,:,3]
 

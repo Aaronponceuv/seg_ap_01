@@ -125,6 +125,11 @@ def main(config=None):
     if os.path.exists(wandb.run.dir+"/model-best.h5"):
 
         test_modelo(wandb.run.dir+"/model-best.h5",conjuntos["test"], imagenes, etiquetas,dim)
+        time.sleep(0.3)
+        
+        artefacto_best_modelo_entrenado.add_file("inputs.pkl")
+        artefacto_best_modelo_entrenado.add_file("pred_etiqueta.pkl")
+        artefacto_best_modelo_entrenado.add_file("true_etiqueta.pkl")
         artefacto_best_modelo_entrenado.add_file(wandb.run.dir+"/model-best.h5")
 
     artefacto_best_modelo_entrenado.add_file("history_seg_ap_01_.json")
