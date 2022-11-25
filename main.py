@@ -20,6 +20,8 @@ from keras.models import load_model
 from test_best import test_modelo
 #wandb.init(settings=wandb.Settings(start_method="fork"))
 
+import os
+
 def fix_gpu():
     config = ConfigProto()
     config.gpu_options.allow_growth = True
@@ -119,12 +121,15 @@ def main(config=None):
     
 
     print("wandb.run.dir: {}".format(wandb.run.dir))
-    test_modelo(wandb.run.dir+"/model-best.h5",conjuntos["test"], imagenes, etiquetas)
 
-    #artefacto_best_modelo_entrenado.add_file("history_seg_ap_01_.json")
-    #wandb.run.log_artifact(artefacto_best_modelo_entrenado)
-    #artefacto_best_modelo_entrenado.add_file(wandb.run.dir+"/model-best.h5")
-    #wandb.run.log_artifact(artefacto_best_modelo_entrenado)
+    if os.path.exists(wandb.run.dir+"/model-best.h5"):
+
+        test_modelo(wandb.run.dir+"/model-best.h5",conjuntos["test"], imagenes, etiquetas)
+        artefacto_best_modelo_entrenado.add_file(wandb.run.dir+"/model-best.h5")
+        wandb.run.log_artifact(artefacto_best_modelo_entrenado)
+
+    artefacto_best_modelo_entrenado.add_file("history_seg_ap_01_.json")
+    wandb.run.log_artifact(artefacto_best_modelo_entrenado)
 
 
 
