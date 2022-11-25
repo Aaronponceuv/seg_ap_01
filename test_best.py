@@ -26,8 +26,7 @@ import time
 #fix_gpu()
 
 
-def rediminesionar(volumen):
-    dim=(128, 128, 64,1)
+def rediminesionar(volumen, dim):
     x = np.linspace(0,volumen.shape[0]-1,volumen.shape[0]) 
     y = np.linspace(0,volumen.shape[1]-1,volumen.shape[1]) 
     z = np.linspace(0,volumen.shape[2]-1,volumen.shape[2]) 
@@ -182,7 +181,7 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
             wandb.log({nombre_imagen+"_axial":mask_img})
 
 
-def evaluar_imagenes(model,conjuntos,imagenes,etiquetas):
+def evaluar_imagenes(model,conjuntos,imagenes,etiquetas,dimension_target):
     detecciones = []
     true_etiqueta = []
     inputs = []
@@ -193,7 +192,7 @@ def evaluar_imagenes(model,conjuntos,imagenes,etiquetas):
         ruta_etiqueta = etiquetas[id]
 
         imagen, _ = nrrd.read(ruta_imagen)
-        imagen = rediminesionar(imagen)
+        imagen = rediminesionar(imagen,dimension_target)
 
         dims =  imagen.shape
         
@@ -204,7 +203,7 @@ def evaluar_imagenes(model,conjuntos,imagenes,etiquetas):
 
 
         etiqueta = utils.to_categorical(etiqueta_no_binaria, num_classes=4)
-        etiqueta = rediminesionar(etiqueta)
+        etiqueta = rediminesionar(etiqueta,dimension_target)
         etiqueta = (etiqueta > 0.5).astype(int)
         #plt.imshow(etiqueta[:,:,20])
         #plt.savefig("test1.png")
@@ -253,8 +252,8 @@ def evaluar_imagenes(model,conjuntos,imagenes,etiquetas):
 
 
 
-def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
-
+def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas, dimensiones_imagen):
+    print("--> En Fase de Test")
     class_labels = {
         0: "Background",
         1: "Art. pulmonar principal",
@@ -272,7 +271,7 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas):
     
 
     
-    inputs, detecciones, true_etiqueta = evaluar_imagenes(model,conjuntos,imagenes,etiquetas)
+    inputs, detecciones, true_etiqueta = evaluar_imagenes(model,conjuntos,imagenes,etiquetas,dimensiones_imagen)
     registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_labels)
 
 
