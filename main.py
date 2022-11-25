@@ -126,7 +126,6 @@ def main(config=None):
 
         test_modelo(wandb.run.dir+"/model-best.h5",conjuntos["test"], imagenes, etiquetas)
         artefacto_best_modelo_entrenado.add_file(wandb.run.dir+"/model-best.h5")
-        wandb.run.log_artifact(artefacto_best_modelo_entrenado)
 
     artefacto_best_modelo_entrenado.add_file("history_seg_ap_01_.json")
     wandb.run.log_artifact(artefacto_best_modelo_entrenado)
