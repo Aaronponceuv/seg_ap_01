@@ -13,7 +13,7 @@ import keras
 from metricas import dice_arteria_derecha
 from matplotlib import pyplot as plt
 from matplotlib.colors import Colormap, ListedColormap
-
+import pickle
 import wandb
 from monai.transforms import Resized
 import time
@@ -270,6 +270,17 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas, dimensiones_imagen):
     
     inputs, detecciones, true_etiqueta = evaluar_imagenes(model,conjuntos,imagenes,etiquetas,dimensiones_imagen)
     registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_labels)
+
+    with open('inputs.pkl', 'wb') as f:
+        pickle.dump(inputs, f)
+
+    with open('pred_etiqueta.pkl', 'wb') as f:
+        pickle.dump(detecciones, f)
+
+    with open('true_etiqueta.pkl', 'wb') as f:
+        pickle.dump(true_etiqueta, f)
+
+    return
 
 
 
