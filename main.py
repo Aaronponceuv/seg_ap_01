@@ -44,7 +44,7 @@ def main(config=None):
     #------------------------+
     # Creacion de artefactos 
     #------------------------+
-    wandb.init(settings=wandb.Settings(start_method="fork"),config=config)
+    wandb.init(settings=wandb.Settings(start_method="fork"),config=config, mode="offline")
     print("wandb.config: ",wandb.config)
 
     config = wandb.config
