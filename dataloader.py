@@ -154,9 +154,11 @@ if __name__ == "__main__":
     etiquetas= "dataset_nrrd/etiquetas.json"
     imagenes = "dataset_nrrd/imagenes.json"
 
-    conjuntos = "../dataset_nrrd/ids.json"
-    etiquetas = "../dataset_nrrd/etiquetas.json"
-    imagenes  = "../dataset_nrrd/imagenes.json"
+    directorio_rutas = "../rutas_de_dataset/v2"
+
+    conjuntos = directorio_rutas + "/ids.json"
+    etiquetas = directorio_rutas + "/etiquetas.json"
+    imagenes  = directorio_rutas + "/imagenes.json"
 
     conjunto_entrenamiento = open(conjuntos)
     etiquetas = open(etiquetas)
@@ -165,8 +167,15 @@ if __name__ == "__main__":
     conjunto_entrenamiento = json.load(conjunto_entrenamiento)
     etiquetas = json.load(etiquetas)
     imagenes = json.load(imagenes)
-    dat = DataLoader(conjunto_entrenamiento["test"],"test", imagenes, etiquetas,batch_size=5, dim=(128, 128, 60) , shuffle=True, n_clases=4,canales=1,tipo_de_dato=".nrrd")
+    #dat = DataLoader(conjunto_entrenamiento["test"],"test", imagenes, etiquetas,batch_size=5, dim=(128, 128, 60) , shuffle=True, n_clases=4,canales=1,tipo_de_dato=".nrrd")
 
+    dat = DataLoader(conjunto_entrenamiento["train"], imagenes, etiquetas,
+                                        batch_size=1,
+                                        dim=(128, 128, 64),
+                                        shuffle=True,
+                                        n_clases=4,
+                                        canales=1,
+                                        tipo_de_dato=".nrrd")
     import matplotlib.pyplot as plt
     for i in range(10):
         for X,y in dat:
