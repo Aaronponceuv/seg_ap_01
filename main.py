@@ -44,7 +44,7 @@ def main(config=None):
     #------------------------+
     # Creacion de artefactos 
     #------------------------+
-    wandb.init(settings=wandb.Settings(start_method="fork"),config=config, mode="offline")
+    wandb.init(settings=wandb.Settings(start_method="fork"),config=config)
     print("wandb.config: ",wandb.config)
 
     config = wandb.config
@@ -170,7 +170,7 @@ if __name__ == "__main__":
             'values': ['adam']
             },
         
-        'epochs': {'values': [500]},
+        'epochs': {'values': [50]},
         'batch_size':{'values':[4]},
 
         'learning_rate':{
