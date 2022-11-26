@@ -245,7 +245,7 @@ def evaluar_imagenes(model,conjuntos,imagenes,etiquetas,dimension_target):
 
 
 
-def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas, dimensiones_imagen):
+def test_modelo(directorio,nombre_modelo,conjuntos, imagenes, etiquetas, dimensiones_imagen):
     print("--> En Fase de Test")
     class_labels = {
         0: "Background",
@@ -255,7 +255,8 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas, dimensiones_imagen):
     }
 
     nombre_imagenes = list(conjuntos)
-
+    ruta_modelo = directorio + "/"+ nombre_modelo
+    
     model = load_model(ruta_modelo,custom_objects={"dice_coefficient_loss":dice_coefficient_loss,
                                                     "dice_promedio": dice_promedio,
                                                     "dice_arteria_principal":dice_arteria_principal,
@@ -267,13 +268,13 @@ def test_modelo(ruta_modelo,conjuntos, imagenes, etiquetas, dimensiones_imagen):
     inputs, detecciones, true_etiqueta = evaluar_imagenes(model,conjuntos,imagenes,etiquetas,dimensiones_imagen)
     registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_labels)
 
-    with open('inputs.pkl', 'wb') as f:
+    with open(directorio+'/inputs.pkl', 'wb') as f:
         pickle.dump(inputs, f)
 
-    with open('pred_etiqueta.pkl', 'wb') as f:
+    with open(directorio+'/pred_etiqueta.pkl', 'wb') as f:
         pickle.dump(detecciones, f)
 
-    with open('true_etiqueta.pkl', 'wb') as f:
+    with open(directorio+'/true_etiqueta.pkl', 'wb') as f:
         pickle.dump(true_etiqueta, f)
 
     return
@@ -305,4 +306,4 @@ if __name__ == "__main__":
     print(conjuntos["test"])
 
 
-    test_modelo("peso_test.h5",conjuntos["test"], imagenes, etiquetas)
+    test_modelo(".","peso_test.h5",conjuntos["test"], imagenes, etiquetas)
