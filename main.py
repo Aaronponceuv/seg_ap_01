@@ -21,6 +21,8 @@ from test_best import test_modelo
 #wandb.init(settings=wandb.Settings(start_method="fork"))
 
 import os
+os.environ["WANDB_START_METHOD"] = "thread"
+
 
 def fix_gpu():
     config = ConfigProto()
