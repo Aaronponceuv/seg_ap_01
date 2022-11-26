@@ -140,6 +140,7 @@ def main(config=None):
 if __name__ == "__main__":
 
     #configuracion de entrenamiento
+    hacer_sweep = True
     config = {
         "modelo":"unet3d",
         "learning_rate": 0.1,
@@ -198,11 +199,11 @@ if __name__ == "__main__":
     etiquetas = json.load(etiquetas)
     imagenes = json.load(imagenes)
 
-    #sweep_id = wandb.sweep(sweep=sweep_config, project='my-first-sweep')
 
     print(config)
-    main(config)
-
-    #wandb.agent(sweep_id, function=main, count=4)
-
+    if hacer_sweep:
+        sweep_id = wandb.sweep(sweep=sweep_config, project='my-first-sweep')
+        wandb.agent(sweep_id, function=main, count=2)
+    else:
+        main(config)
 
