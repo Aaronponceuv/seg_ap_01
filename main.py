@@ -46,7 +46,7 @@ def main(config=None):
     #------------------------+
     # Creacion de artefactos 
     #------------------------+
-    wandb.init(settings=wandb.Settings(start_method="fork"),config=config)
+    wandb.init(settings=wandb.Settings(start_method="fork"),config=config,mode="offline")
     print("wandb.config: ",wandb.config)
 
     config = wandb.config
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     }
 
     metric = {
-        'name': 'val_dice_coefficient',
+        'name': 'val_dice_promedio',
         'goal': 'maximize'   
     }
 
@@ -172,7 +172,7 @@ if __name__ == "__main__":
             'values': ['adam']
             },
         
-        'epochs': {'values': [50]},
+        'epochs': {'values': [500]},
         'batch_size':{'values':[4]},
 
         'learning_rate':{
@@ -204,8 +204,8 @@ if __name__ == "__main__":
 
     print(config)
     if hacer_sweep:
-        sweep_id = wandb.sweep(sweep=sweep_config, project='my-first-sweep')
-        wandb.agent(sweep_id, function=main, count=2)
+        sweep_id = wandb.sweep(sweep=sweep_config, project='sweep_seg_ap_01')
+        wandb.agent(sweep_id, function=main, count=20)
     else:
         main(config)
 
