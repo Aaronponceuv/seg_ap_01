@@ -17,7 +17,7 @@ import pickle
 import wandb
 from monai.transforms import Resized
 import time
-
+import logging
 
 #def fix_gpu():
 #    config = ConfigProto()
@@ -104,9 +104,10 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
                         "class_labels" : class_labels
                     }
                 })
-            
-            wandb.log({nombre_imagen+"_sagital":mask_img})
-
+            try:
+                wandb.log({nombre_imagen+"_sagital":mask_img})
+            except Exception as e:
+                logging.debug("ERROR LINEA Sagital {} {}".format(e,e.args))
 
         # Coronal
         #"""
@@ -138,9 +139,10 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
                         "class_labels" : class_labels
                     }
                 })
-            
-            wandb.log({nombre_imagen+"_coronal":mask_img})
-
+            try:
+                wandb.log({nombre_imagen+"_coronal":mask_img})
+            except Exception as e:
+                logging.debug("ERROR LINEA CORONAL {} {}".format(e,e.args))
 
         for id in range(0,img.shape[0]):
             #print("=] id ",id)
@@ -170,9 +172,10 @@ def registrar_evaluacion(inputs,true_etiqueta,detecciones,nombre_imagenes,class_
                         "class_labels" : class_labels
                     }
                 })
-            
-            wandb.log({nombre_imagen+"_axial":mask_img})
-
+            try:
+                wandb.log({nombre_imagen+"_axial":mask_img})
+            except Exception as e:
+                logging.debug("ERROR LINEA AXIAL {} {}".format(e,e.args))
 
 def evaluar_imagenes(model,conjuntos,imagenes,etiquetas,dimension_target):
     detecciones = []
