@@ -205,7 +205,7 @@ if __name__ == "__main__":
     print(config)
     if hacer_sweep:
         sweep_id = wandb.sweep(sweep=sweep_config, project='sweep_seg_ap_01')
-        wandb.agent(sweep_id, function=main, count=20)
+        wandb.agent(sweep_id, function=main, count=10)
     else:
         main(config)
 
