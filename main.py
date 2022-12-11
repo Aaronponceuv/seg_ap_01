@@ -163,7 +163,7 @@ if __name__ == "__main__":
     }
 
     metric = {
-        'name': 'val_dice_coefficient',
+        'name': 'val_dice_promedio',
         'goal': 'maximize'   
     }
 
@@ -173,7 +173,7 @@ if __name__ == "__main__":
             },
         
         'epochs': {'values': [500]},
-        'batch_size':{'values':[4]},
+        'batch_size':{'values':[1]},
 
         'learning_rate':{
             'distribution': 'uniform',
