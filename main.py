@@ -107,7 +107,7 @@ def main(config=None):
     history = model.fit(generador_entrenamiento,validation_data=generador_test,epochs=config["epochs"], 
                         workers=3, use_multiprocessing=False, verbose=1,callbacks=[WandbCallback(monitor="val_dice_promedio",mode="max",verbose=2)])#checkpoint ,
     
-    file = open("history_seg_ap_01_.json", "w")
+    file = open(wandb.run.dir+"/history_seg_ap_01_.json", "w")
     json.dump(history.history, file)
     file.close()
 
