@@ -55,7 +55,7 @@ class DataLoader(keras.utils.Sequence):
 
         #Busqueda de lista de ids
         list_IDs_temp = [self.list_IDs[k] for k in indices]
-
+        print(indices)
         X, y = self.__data_generation(list_IDs_temp)
         
         return X,y
@@ -142,7 +142,7 @@ class DataLoader(keras.utils.Sequence):
 
 
 
-#"""
+"""
 if __name__ == "__main__":
     logging.basicConfig(filename="train.log", level=logging.DEBUG)
 
@@ -180,7 +180,7 @@ if __name__ == "__main__":
     for i in range(10):
         for X,y in dat:
             print("y.shape:",y.shape)
-            """
+            
             X = X[0].reshape(128, 128, 60)
             y = y[0].reshape(128, 128, 60,4)
 
@@ -212,6 +212,5 @@ if __name__ == "__main__":
             ax[2,0].plot([0,127],[axial,axial], color="white", linewidth=2)
             ax[2,0].plot([coronal,coronal],[0,127], color="green", linewidth=2)
             plt.show()
-            """
 
-        #"""
+"""
