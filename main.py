@@ -21,7 +21,7 @@ from test_best import test_modelo
 #wandb.init(settings=wandb.Settings(start_method="fork"))
 
 import os
-#os.environ["WANDB_START_METHOD"] = "thread"
+os.environ["WANDB_START_METHOD"] = "thread"
 
 
 def fix_gpu():
@@ -46,7 +46,7 @@ def main(config=None):
     #------------------------+
     # Creacion de artefactos 
     #------------------------+
-    wandb.init(settings=wandb.Settings(start_method="fork"),config=config,mode="offline")
+    wandb.init(settings=wandb.Settings(start_method="thread",console='off'),config=config,mode="online")
     print("wandb.config: ",wandb.config)
 
     config = wandb.config
@@ -105,7 +105,7 @@ def main(config=None):
     #ruta_save = directorio_pesos+'/version_'+str(config["version"])+"_epoca_{epoch:02d}_val_loss_{val_loss:.2f}_loss_{loss:.2f}_val_dice_{val_dice_coefficient:.2f}_train_dice_{dice_coefficient:.2f}.h5"
     #checkpoint = ModelCheckpoint(ruta_save, monitor="loss", verbose=1,save_best_only=True, mode="min", save_weights_only=False)
     history = model.fit(generador_entrenamiento,validation_data=generador_test,epochs=config["epochs"], 
-                        workers=3, use_multiprocessing=False, verbose=1,callbacks=[WandbCallback(monitor="val_dice_promedio",mode="max",verbose=1)])#checkpoint ,
+                        workers=3, use_multiprocessing=False, verbose=1,callbacks=[WandbCallback(monitor="val_dice_promedio",mode="max",verbose=2)])#checkpoint ,
     
     file = open("history_seg_ap_01_.json", "w")
     json.dump(history.history, file)
@@ -136,6 +136,7 @@ def main(config=None):
 
     artefacto_best_modelo_entrenado.add_file("history_seg_ap_01_.json")
     wandb.run.log_artifact(artefacto_best_modelo_entrenado)
+    wandb.finish()
 
 
 
@@ -169,11 +170,11 @@ if __name__ == "__main__":
 
     parameters = {
         'optimizer': {
-            'values': ['adam']
+            'values': ['adam','sgd']
             },
         
-        'epochs': {'values': [500]},
-        'batch_size':{'values':[4]},
+        'epochs': {'values': [600]},
+        'batch_size':{'values':[4,8]},
 
         'learning_rate':{
             'distribution': 'uniform',
@@ -204,8 +205,8 @@ if __name__ == "__main__":
 
     print(config)
     if hacer_sweep:
-        sweep_id = wandb.sweep(sweep=sweep_config, project='sweep_seg_ap_01')
-        wandb.agent(sweep_id, function=main, count=10)
+        sweep_id = wandb.sweep(sweep=sweep_config, project='sweep_seg_ap_01_01')
+        wandb.agent(sweep_id, function=main, count=20)
     else:
         main(config)
 
